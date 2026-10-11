@@ -1,0 +1,202 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------
+   Design tokens. Light values first; the dark block only redefines them.
+   The theme is set as data-theme on <html> (see hooks/useTheme.js and index.html).
+   Components never use raw colours, only these tokens (via the Tailwind
+   colour utilities declared in @theme below).
+------------------------------------------------------------------- */
+:root {
+  --ground: #f5f3ee;
+  --ink: #0e0e0e;
+  --muted: #6b6964;
+  --accent: #d21f26;
+  --accent-ink: #d21f26; /* accent used as text on the ground */
+  --on-accent: #ffffff;
+  --line: #d9d6ce;
+  --soft: #eae7e0;
+  --dash: #b9b5ad;
+  --off: #d9d6ce;
+  --off-ink: #8d8a84;
+
+  --vinyl: #111112;
+  --vinyl-groove: #1e1e21;
+  --vinyl-edge: rgb(255 255 255 / 0);
+  --arm: #0e0e0e;
+  --hold: #0e0e0e;
+
+  /* the main story card is inverted against the page */
+  --hero-bg: #0e0e0e;
+  --hero-fg: #f5f3ee;
+  --hero-muted: #b8b5ae;
+  --hero-red: #ff6b6e;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #131312;
+  --ink: #f3f1ec;
+  --muted: #a5a29b;
+  --accent-ink: #ff6b6e;
+  --line: #33322f;
+  --soft: #1f1e1c;
+  --dash: #55534e;
+  --off: #2a2927;
+  --off-ink: #77746e;
+
+  --vinyl: #0a0a0b;
+  --vinyl-groove: #19191b;
+  --vinyl-edge: rgb(255 255 255 / 0.16);
+  --arm: #d9d6ce;
+  --hold: #000000;
+
+  --hero-bg: #f3f1ec;
+  --hero-fg: #0e0e0e;
+  --hero-muted: #6b6964;
+  --hero-red: #d21f26;
+}
+
+/* lets you write dark: utilities that follow the switch as well */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme inline {
+  --font-sans: "Hanken Grotesk", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --color-ground: var(--ground);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-on-accent: var(--on-accent);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-dash: var(--dash);
+  --color-off: var(--off);
+  --color-off-ink: var(--off-ink);
+  --color-arm: var(--arm);
+  --color-hold: var(--hold);
+  --color-hero: var(--hero-bg);
+  --color-hero-ink: var(--hero-fg);
+  --color-hero-muted: var(--hero-muted);
+  --color-hero-accent: var(--hero-red);
+}
+
+@theme {
+  --animate-enter: enter 0.35s ease both;
+  --animate-drop: drop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-rpm33: rpm33 1.8s linear infinite; /* 33⅓ rpm is one turn every 1.8 s */
+
+  @keyframes enter {
+    from { opacity: 0.4; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes drop {
+    from { opacity: 0.3; transform: scale(1.08); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes rpm33 {
+    to { transform: rotate(360deg); }
+  }
+}
+
+@layer base {
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 17px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button {
+    text-transform: inherit;
+  }
+  button:not(:disabled) {
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent-ink);
+    outline-offset: 3px;
+  }
+}
+
+/* Two type roles used everywhere: small mono caps for labels, tight display caps for headlines. */
+@utility caps {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@utility headline {
+  font-weight: 500;
+  line-height: 0.84;
+  letter-spacing: -0.055em;
+  text-transform: uppercase;
+  text-wrap: balance;
+  /* the glyphs overflow their line box, so let clicks pass through to what sits above */
+  pointer-events: none;
+}
+
+@layer components {
+  /* The record itself: grooves and a fixed sheen. Only the label spins. */
+  .vinyl {
+    background-color: var(--vinyl);
+    background-image:
+      conic-gradient(
+        from 30deg,
+        rgb(255 255 255 / 0) 0deg,
+        rgb(255 255 255 / 0.13) 20deg,
+        rgb(255 255 255 / 0) 42deg,
+        rgb(255 255 255 / 0) 180deg,
+        rgb(255 255 255 / 0.1) 200deg,
+        rgb(255 255 255 / 0) 222deg,
+        rgb(255 255 255 / 0) 360deg
+      ),
+      repeating-radial-gradient(circle at center, var(--vinyl) 0 2px, var(--vinyl-groove) 2px 3px);
+    box-shadow: 0 0 0 1px var(--vinyl-edge);
+  }
+
+  /* The seek bar: a 2px line with a small round thumb. --pct is the played share. */
+  .seek {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    cursor: pointer;
+    background:
+      linear-gradient(var(--accent), var(--accent)) left center / var(--pct, 0%) 2px no-repeat,
+      linear-gradient(var(--line), var(--line)) center / 100% 2px no-repeat;
+  }
+  .seek:disabled {
+    cursor: default;
+  }
+  .seek::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 10px;
+    height: 10px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .seek::-moz-range-thumb {
+    width: 10px;
+    height: 10px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+  .seek::-moz-range-track {
+    background: none;
+  }
+  .seek:disabled::-webkit-slider-thumb {
+    background: var(--off);
+  }
+  .seek:disabled::-moz-range-thumb {
+    background: var(--off);
+  }
+}
